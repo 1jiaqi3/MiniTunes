@@ -1,7 +1,14 @@
 <template>
   <div class="rec">
     <div class="rec-content">
-      <div class="slides-wrapper">
+      <div class="slides-wrapper" v-if="recs.length">
+        <slider>
+          <div v-for="item in recs">
+            <a :href="item.linkUrl">
+              <img :src="item.picUrl"/>
+            </a>
+          </div>
+        </slider>
       </div>
       <div class="rec-list">
         <h1 class="list-title">On Trend</h1>
@@ -16,7 +23,14 @@
 <script type="text/ecmascript-6">
   import {getRec} from '../../common/api/recommend';
   import {ERR_OK} from '../../common/api/config';
+  import Slider from '../../base/slider/slider';
+
   export default {
+    data() {
+      return {
+        recs: []
+      };
+    },
     created() {
       this._getRec();
     },
@@ -24,10 +38,13 @@
       _getRec() {
         getRec().then((res) => {
           if (res.code === ERR_OK) {
-            console.log(res.data.slider);
+            this.recs = res.data.slider;
           }
         });
       }
+    },
+    components: {
+      Slider
     }
   };
 </script>
