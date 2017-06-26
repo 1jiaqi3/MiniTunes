@@ -25,16 +25,18 @@
   .nav
     display: flex
     height: 44px
-    line-height: 44px
-    font-size: $font-size-medium
     .nav-item
       flex: 1
+      line-height: 44px
       text-align: center
+      font-size: $font-size-medium
       .nav-link
-        padding-bottom: 5px
+        padding-bottom: 6px
         color: $color-text-l
-      &.router-link-active
-        .nav-link
-          color: $color-theme
-          border-bottom: 2px solid $color-theme
+    .router-link-active
+      .nav-link
+        color: $color-theme
+        border-bottom: 2px solid $color-theme
+
+
 </style>

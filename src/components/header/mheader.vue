@@ -18,7 +18,6 @@
     text-align: center
     color: $color-theme
     .title
-      display: inline-block
       line-height: 44px
       font-size: $font-size-large
 
