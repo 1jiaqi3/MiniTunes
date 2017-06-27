@@ -1,6 +1,6 @@
 <template>
   <div class="rec">
-    <scroll class="rec-content" :data="discList">
+    <scroll class="rec-content" :data="discList" ref="scroll">
       <div>
         <div class="slides-wrapper" v-if="recs.length">
           <slider>
@@ -16,7 +16,7 @@
           <ul>
             <li v-for="item in discList" class="item">
               <div class="icon">
-                <img :src="item.imgurl" width="60" height="60"/>
+                <img :src="item.imgurl" width="60" height="60" @load="loadImg"/>
               </div>
               <div class="text">
                 <h2 class="name" v-html="item.creator.name"></h2>
@@ -61,6 +61,12 @@
             this.discList = res.data.list;
           }
         });
+      },
+      loadImg() {
+        if (!this.loaded) {
+          this.$refs.scroll.refresh();
+          this.loaded = true;
+        }
       }
     },
     components: {
