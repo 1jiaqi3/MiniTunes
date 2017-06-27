@@ -1,11 +1,14 @@
 <template>
-  <div class="singer"></div>
+  <div class="singer">
+    <list-view :data="singers"></list-view>
+  </div>
 </template>
 
 <script type="text/ecmascript-6">
   import {getPer} from '../../common/api/performer';
   import {ERR_OK} from '../../common/api/config';
   import Singer from '../../common/js/singer';
+  import ListView from '../../base/listview/listview';
 
   const TREND_LEN = 10;
   export default {
@@ -22,7 +25,7 @@
         getPer().then((res) => {
           if (res.code === ERR_OK) {
             this.singers = res.data.list;
-            console.log(this._normalizeSinger(this.singers));
+            this.singers = this._normalizeSinger(this.singers);
           }
         });
       },
@@ -36,7 +39,7 @@
         list.forEach((item, index) => {
           if (index < TREND_LEN) {
             map.hot.items.push(new Singer({
-              id: item.Fsing_mid,
+              id: item.Fsinger_mid,
               name: item.Fsinger_name
             }));
           }
@@ -49,7 +52,7 @@
             };
           }
           map[key].items.push(new Singer({
-            id: item.Fsing_mid,
+            id: item.Fsinger_mid,
             name: item.Fsinger_name
           }));
         });
@@ -60,10 +63,9 @@
         let res = [];
         for (let key in map) {
           let val = map[key];
-          if (val.title.match(/[a-zA-Z]/)) {
+          if (val.title.match(/[a-zA-Z]/) && key !== 'hot') {
             res.push(val);
-          }
-          if (key === 'hot') {
+          } else if (key === 'hot') {
             trends.push(val);
           }
         }
@@ -72,6 +74,9 @@
         });
         return trends.concat(res);
       }
+    },
+    components: {
+      ListView
     }
   };
 </script>
