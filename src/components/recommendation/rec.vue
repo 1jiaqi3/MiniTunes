@@ -1,6 +1,6 @@
 <template>
   <div class="rec">
-    <div class="rec-content">
+    <scroll class="rec-content" :data="discList">
       <div>
         <div class="slides-wrapper" v-if="recs.length">
           <slider>
@@ -26,11 +26,12 @@
           </ul>
         </div>
       </div>
-    </div>
+    </scroll>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
+  import Scroll from '../../base/scroll/scroll';
   import {getRec, getDiscList} from '../../common/api/recommend';
   import {ERR_OK} from '../../common/api/config';
   import Slider from '../../base/slider/slider';
@@ -63,7 +64,8 @@
       }
     },
     components: {
-      Slider
+      Slider,
+      Scroll
     }
   };
 </script>
@@ -75,6 +77,7 @@
     position: fixed
     width: 100%
     top: 88px
+    bottom: 0
     .rec-content
       height: 100%
       overflow: hidden
