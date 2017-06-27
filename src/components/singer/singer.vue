@@ -5,6 +5,9 @@
 <script type="text/ecmascript-6">
   import {getPer} from '../../common/api/performer';
   import {ERR_OK} from '../../common/api/config';
+  import Singer from '../../common/js/singer';
+
+  const TREND_LEN = 10;
   export default {
     data() {
       return {
@@ -19,9 +22,55 @@
         getPer().then((res) => {
           if (res.code === ERR_OK) {
             this.singers = res.data.list;
-            console.log(this.singers);
+            console.log(this._normalizeSinger(this.singers));
           }
         });
+      },
+      _normalizeSinger(list) {
+        let map = {
+          hot: {
+            title: 'Trending',
+            items: []
+          }
+        };
+        list.forEach((item, index) => {
+          if (index < TREND_LEN) {
+            map.hot.items.push(new Singer({
+              id: item.Fsing_mid,
+              name: item.Fsinger_name
+            }));
+          }
+          // key is the alphabetical index
+          const key = item.Findex;
+          if (!map[key]) {
+            map[key] = {
+              title: key,
+              items: []
+            };
+          }
+          map[key].items.push(new Singer({
+            id: item.Fsing_mid,
+            name: item.Fsinger_name
+          }));
+        });
+        return this._sortSingerList(map);
+      },
+      _sortSingerList(map) {
+        let trends = [];
+        let res = [];
+        for (let key in map) {
+          let val = map[key];
+          if (val.title.match(/[a-zA-Z]/)) {
+            res.push(val);
+          }
+          if (key === 'hot') {
+            trends.push(val);
+          }
+        }
+        res.sort((i, j) => {
+          return i.title.charCodeAt(0) - j.title.charCodeAt(0);
+        });
+        return trends.concat(res);
       }
     }
   };
