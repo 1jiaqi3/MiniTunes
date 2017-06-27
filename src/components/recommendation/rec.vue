@@ -1,44 +1,63 @@
 <template>
   <div class="rec">
     <div class="rec-content">
-      <div class="slides-wrapper" v-if="recs.length">
-        <slider>
-          <div v-for="item in recs">
-            <a :href="item.linkUrl">
-              <img :src="item.picUrl"/>
-            </a>
-          </div>
-        </slider>
-      </div>
-      <div class="rec-list">
-        <h1 class="list-title">On Trend</h1>
-        <ul>
-
-        </ul>
+      <div>
+        <div class="slides-wrapper" v-if="recs.length">
+          <slider>
+            <div v-for="item in recs">
+              <a :href="item.linkUrl">
+                <img :src="item.picUrl"/>
+              </a>
+            </div>
+          </slider>
+        </div>
+        <div class="rec-list">
+          <h1 class="list-title">On Trend</h1>
+          <ul>
+            <li v-for="item in discList" class="item">
+              <div class="icon">
+                <img :src="item.imgurl" width="60" height="60"/>
+              </div>
+              <div class="text">
+                <h2 class="name" v-html="item.creator.name"></h2>
+                <p class="desc" v-html="item.dissname"></p>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-  import {getRec} from '../../common/api/recommend';
+  import {getRec, getDiscList} from '../../common/api/recommend';
   import {ERR_OK} from '../../common/api/config';
   import Slider from '../../base/slider/slider';
 
   export default {
     data() {
       return {
-        recs: []
+        recs: [],
+        discList: []
       };
     },
     created() {
       this._getRec();
+      this._getDiscList();
     },
     methods: {
       _getRec() {
         getRec().then((res) => {
           if (res.code === ERR_OK) {
             this.recs = res.data.slider;
+          }
+        });
+      },
+      _getDiscList() {
+        getDiscList().then((res) => {
+          if (res.code === ERR_OK) {
+            this.discList = res.data.list;
           }
         });
       }
@@ -73,12 +92,19 @@
           box-sizing: border-box
           align-items: center
           padding: 0 20px 20px 20px
-          overflow: hidden
-          font-size: $font-size-medium
-          .name
-            margin-bottom: 10px
-            color: $color-text
-          .desc
-            color: $color-text-d
+          .icon
+            flex: 0 0 60px
+            width: 60px
+            padding-right: 20px
+          .text
+            display: flex
+            flex-direction: column
+            justify-content: center
+            flex: 1
+            .name
+              margin-bottom: 10px
+              color: $color-text
+            .desc
+              color: $color-text-d
 
 </style>
