@@ -1,5 +1,5 @@
 <template>
-  <scroll class="listview" :data="data" ref="listview">
+  <scroll class="listview" :data="data" ref="listview" :listenScroll="listenScroll" @scroll="scroll" :probeType="probeType">
     <ul>
       <li v-for="group in data" class="list-group" ref="listGroup">
         <h2 class="list-group-title">{{group.title}}</h2>
@@ -13,7 +13,8 @@
     </ul>
     <div class="list-shortcut" @touchstart="onShortcutTouchStart" @touchmove.stop.prevent="onShortcutTouchMove">
       <ul>
-        <li v-for="(item, index) in shortcutList" class="item" :data-index="index">
+        <li v-for="(item, index) in shortcutList" class="item" :data-index="index"
+            :class="{'current': currentIdx === index}">
           {{item}}
         </li>
       </ul>
@@ -33,8 +34,17 @@
         default: []
       }
     },
+    data() {
+      return {
+        scrollY: -1,
+        currentIdx: 0
+      };
+    },
     created() {
       this.touch = {};
+      this.listenScroll = true;
+      this.listHeight = [];
+      this.probeType = 3;
     },
     computed: {
       shortcutList() {
@@ -49,14 +59,62 @@
         let firstTouch = e.touches[0];
         this.touch.y1 = firstTouch.pageY;
         this.touch.shortIndex = shortIndex;
-        this.$refs.listview.scrollToElement(this.$refs.listGroup[shortIndex], 0);
+        this._scrollTo(shortIndex);
       },
       onShortcutTouchMove(e) {
         let firstTouch = e.touches[0];
         this.touch.y2 = firstTouch.pageY;
         let diff = Math.floor((this.touch.y2 - this.touch.y1) / SHORT_HEIGHT);
         let shortIndex = parseInt(this.touch.shortIndex) + diff;
-        this.$refs.listview.scrollToElement(this.$refs.listGroup[shortIndex], 0);
+        this._scrollTo(shortIndex);
+      },
+      _scrollTo(index) {
+        if (index === null) {
+          return;
+        }
+        if (index < 0) {
+          index = 0;
+        } else if (index > this.listHeight.length - 2) {
+          index = this.listHeight.length - 2;
+        }
+        this.scrollY = -this.listHeight[index];
+        this.$refs.listview.scrollToElement(this.$refs.listGroup[index], 0);
+      },
+      scroll(pos) {
+        this.scrollY = pos.y;
+      },
+      _computeHeight() {
+        this.listHeight = [];
+        const list = this.$refs.listGroup;
+        let height = 0;
+        this.listHeight.push(height);
+        for (let i = 0; i < list.length; i++) {
+          height += list[i].clientHeight;
+          this.listHeight.push(height);
+        }
+      }
+    },
+    watch: {
+      data() {
+        setTimeout(() => {
+          this._computeHeight();
+        }, 20);
+      },
+      scrollY(newY) {
+        const listHeight = this.listHeight;
+        if (newY > 0) {
+          this.currentIdx = 0;
+          return;
+        }
+        for (let i = 0; i < listHeight.length - 1; i++) {
+          let h1 = listHeight[i];
+          let h2 = listHeight[i + 1];
+          if (-newY >= h1 && -newY < h2) {
+            this.currentIdx = i;
+            return;
+          }
+        }
+        this.currentIdx = listHeight.length - 2;
       }
     },
     components: {
@@ -66,6 +124,8 @@
 </script>
 
 <style lang="stylus" rel="stylesheet/stylus">
+  @import '../../common/stylus/variable.styl'
+
   .listview
     position: relative
     width: 100%
@@ -78,8 +138,6 @@
         height: 30px
         line-height: 30px
         padding-left: 20px
-        font-size: $font-size-small
-        color: $color-text-l
       .list-group-item
         display: flex
         align-items: center
@@ -108,5 +166,7 @@
         line-height: 1
         color: $color-text-l
         font-size: $font-size-small
+        &.current
+          color: $color-theme
 
 </style>
