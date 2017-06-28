@@ -1,6 +1,7 @@
 <template>
   <div class="singer">
-    <list-view :data="singers"></list-view>
+    <list-view :data="singers" @select="selectSinger"></list-view>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -73,6 +74,11 @@
           return i.title.charCodeAt(0) - j.title.charCodeAt(0);
         });
         return trends.concat(res);
+      },
+      selectSinger(singer) {
+        this.$router.push({
+          path: `/singer/${singer.id}`
+        });
       }
     },
     components: {
