@@ -1,10 +1,16 @@
 <template>
   <div class="music-list">
-    <div class="back">
+    <div class="back" @click="back">
       <i class="icon-arrow_lift"></i>
     </div>
     <h1 class="title" v-html="title"></h1>
     <div class="bg-img" :style="bgStyle" ref="bgimg">
+      <div class="play-wrapper">
+        <div class="play" v-show="songs.length > 0" ref="play">
+          <i class="icon-keyboard_arrow_right"></i>
+          <span class="text">Pick One For Me</span>
+        </div>
+      </div>
       <div class="filter" ref="filter"></div>
     </div>
     <div class="bg-layer" ref="layer"></div>
@@ -12,6 +18,9 @@
             :probe-type="probeType" :listen-scroll="listenScroll" @scroll="scroll">
       <div class="song-list-wrapper">
         <song-list :songs="songs"></song-list>
+      </div>
+      <div class="loading-container" v-show="!songs.length">
+        <loading></loading>
       </div>
     </scroll>
   </div>
@@ -21,6 +30,7 @@
   import Scroll from '../../base/scroll/scroll';
   import SongList from '../../components/song-list/song-list';
   import {prefixStyle} from '../../common/js/dom';
+  import Loading from '../../base/loading/loading';
 
   const transform = prefixStyle('transform');
   const backdrop = prefixStyle('backdrop-filter');
@@ -63,6 +73,9 @@
     methods: {
       scroll(pos) {
         this.scrollY = pos.y;
+      },
+      back() {
+        this.$router.back();
       }
     },
     watch: {
@@ -76,9 +89,11 @@
           z = 10;
           this.$refs.bgimg.style.paddingTop = 0;
           this.$refs.bgimg.style.height = `${RESERVED_HEIGHT}px`;
+          this.$refs.play.style.display = 'none';
         } else {
           this.$refs.bgimg.style.paddingTop = '70%';
           this.$refs.bgimg.style.height = 0;
+          this.$refs.play.style.display = '';
         }
         const percent = Math.abs(newY / this.imgHeight);
         // when scroll direction is down
@@ -95,7 +110,8 @@
     },
     components: {
       Scroll,
-      SongList
+      SongList,
+      Loading
     }
   };
 </script>
@@ -147,6 +163,30 @@
         width: 100%
         height: 100%
         background: rgba(7, 17, 27, 0.4)
+      .play-wrapper
+        position: absolute
+        bottom: 20px
+        z-index: 50
+        width: 100%
+        .play
+          box-sizing: border-box
+          width: 145px
+          padding: 7px 0
+          margin: 0 auto
+          text-align: center
+          border: 1px solid $color-theme
+          color: $color-theme
+          border-radius: 100px
+          font-size: 0
+          .icon-keyboard_arrow_right
+            display: inline-block
+            vertical-align: middle
+            margin-right: 6px
+            font-size: $font-size-medium-x
+          .text
+            display: inline-block
+            vertical-align: middle
+            font-size: $font-size-small
 
     .list
       position: fixed

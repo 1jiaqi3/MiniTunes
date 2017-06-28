@@ -21,7 +21,7 @@
     },
     methods: {
       getDesc(song) {
-        return `%${song.singers}--${song.album}`;
+        return `${song.singers}--${song.album}`;
       }
     }
   };
