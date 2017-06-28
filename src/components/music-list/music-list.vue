@@ -5,7 +5,7 @@
     </div>
     <h1 class="title" v-html="title"></h1>
     <div class="bg-img" :style="bgStyle" ref="bgimg">
-      <div class="filter"></div>
+      <div class="filter" ref="filter"></div>
     </div>
     <div class="bg-layer" ref="layer"></div>
     <scroll :data="songs" class="list" ref="list"
@@ -20,7 +20,10 @@
 <script type="text/ecmascript-6">
   import Scroll from '../../base/scroll/scroll';
   import SongList from '../../components/song-list/song-list';
+  import {prefixStyle} from '../../common/js/dom';
 
+  const transform = prefixStyle('transform');
+  const backdrop = prefixStyle('backdrop-filter');
   const RESERVED_HEIGHT = 40;
 
   export default {
@@ -64,9 +67,30 @@
     },
     watch: {
       scrollY(newY) {
+        let z = 0;
+        let scale = 1;
         let translateY = Math.max(this.minTranslateY, newY);
-        this.$refs.layer.style['transform'] = `translate3d(0, ${translateY}px, 0)`;
-        this.$refs.layer.style['webkitTransform'] = `translate3d(0, ${translateY}px, 0)`;
+        let blur = 0;
+        this.$refs.layer.style[transform] = `translate3d(0, ${translateY}px, 0)`;
+        if (newY < this.minTranslateY) {
+          z = 10;
+          this.$refs.bgimg.style.paddingTop = 0;
+          this.$refs.bgimg.style.height = `${RESERVED_HEIGHT}px`;
+        } else {
+          this.$refs.bgimg.style.paddingTop = '70%';
+          this.$refs.bgimg.style.height = 0;
+        }
+        const percent = Math.abs(newY / this.imgHeight);
+        // when scroll direction is down
+        if (newY > 0) {
+          scale = 1 + percent;
+          z = 10;
+        } else {
+          blur = Math.min(20 * percent, 20);
+        }
+        this.$refs.bgimg.style.zIndex = z;
+        this.$refs.bgimg.style[transform] = `scale(${scale})`;
+        this.$refs.filter.style[backdrop] = `blur(${blur}px)`;
       }
     },
     components: {
@@ -126,14 +150,15 @@
 
     .list
       position: fixed
-      z-index: 30
       top: 0
       bottom: 0
       width: 100%
+      background: $color-background
       .song-list-wrapper
         padding: 20px 30px
     .bg-layer
       position: relative
       height: 100%
       background: $color-background
+
 </style>
