@@ -9,19 +9,20 @@
   import {mapGetters} from 'vuex';
   export default {
     computed: {
-      ...mapGetters([
-        'topList'
-      ]),
       title() {
         return this.topList.topTitle;
       },
       bgimg() {
         return this.topList.picUrl;
-      }
+      },
+      ...mapGetters([
+        'topList'
+      ])
     },
     components: {
       MusicList
     }
+
   };
 </script>
 

@@ -18,6 +18,7 @@
         <loading></loading>
       </div>
     </scroll>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -26,7 +27,7 @@
   import {ERR_OK} from '../../common/api/config';
   import Scroll from '../../base/scroll/scroll';
   import Loading from '../../base/loading/loading';
-  import {mapMutations} from 'vuex';
+  import {mapMutations, mapGetters} from 'vuex';
   export default {
     data() {
       return {
@@ -45,7 +46,6 @@
         });
       },
       selectItem(item) {
-        console.log('HIIIII');
         this.$router.push({
           path: `/rank/${item.id}`
         });
@@ -53,7 +53,10 @@
       },
       ...mapMutations({
         setTopList: 'SET_TOP_LIST'
-      })
+      }),
+      ...mapGetters([
+        'topList'
+      ])
     },
     components: {
       Scroll,

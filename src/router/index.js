@@ -28,7 +28,7 @@ export default new Router({
       children: [
         {
           path: ':id',
-          component: Disc
+          component: TopList
         }
       ]
     },
