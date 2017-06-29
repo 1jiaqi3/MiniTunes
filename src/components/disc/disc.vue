@@ -31,7 +31,26 @@
       this._getSongList();
     },
     methods: {
-
+      _getSongList() {
+        if (!this.disc.dissid) {
+          this.$router.push('/rec');
+          return;
+        }
+        getSongList(this.disc.dissid).then((res) => {
+          if (res.code === ERR_OK) {
+            this.songs = this._normalizeSongs(res.cdlist[0].songlist);
+          }
+        });
+      },
+      _normalizeSongs(datas) {
+        let res = [];
+        datas.forEach((data) => {
+          if (data.songid && data.albumid) {
+            res.push(createSong(data));
+          }
+        });
+        return res;
+      }
     },
     components: {
       MusicList
