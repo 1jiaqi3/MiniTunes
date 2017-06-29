@@ -2,7 +2,7 @@
   <div class="rank">
     <scroll class="toplist" :data="topList">
       <ul>
-        <li class="item" v-for="item in topList">
+        <li class="item" v-for="item in topList" @click="selectItem(item)">
           <div class="icon">
             <img v-lazy="item.picUrl" width="100" height="100"/>
           </div>
@@ -26,6 +26,7 @@
   import {ERR_OK} from '../../common/api/config';
   import Scroll from '../../base/scroll/scroll';
   import Loading from '../../base/loading/loading';
+  import {mapMutations} from 'vuex';
   export default {
     data() {
       return {
@@ -42,7 +43,17 @@
             this.topList = res.data.topList;
           }
         });
-      }
+      },
+      selectItem(item) {
+        console.log('HIIIII');
+        this.$router.push({
+          path: `/rank/${item.id}`
+        });
+        this.setTopList(item);
+      },
+      ...mapMutations({
+        setTopList: 'SET_TOP_LIST'
+      })
     },
     components: {
       Scroll,
