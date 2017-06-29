@@ -1,6 +1,3 @@
-/**
- * Created by mac on 26/06/2017.
- */
 import jsonp from '../../common/js/jsonp';
 import {commonParams, options} from './config';
 import axios from 'axios';
