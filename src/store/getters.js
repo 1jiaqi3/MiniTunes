@@ -8,3 +8,4 @@ export const currentIdx = state => state.currentIdx;
 export const currentSong = (state) => {
   return state.playlist[state.currentIdx] || {};
 };
+export const disc = state => state.disc;

@@ -14,7 +14,7 @@
         <div class="rec-list">
           <h1 class="list-title">On Trend</h1>
           <ul>
-            <li v-for="item in discList" class="item">
+            <li v-for="item in discList" class="item" @click="selectItem(item)">
               <div class="icon">
                 <img v-lazy="item.imgurl" width="60" height="60" @load="loadImg"/>
               </div>
@@ -30,6 +30,7 @@
         <loading></loading>
       </div>
     </scroll>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -39,6 +40,7 @@
   import {ERR_OK} from '../../common/api/config';
   import Slider from '../../base/slider/slider';
   import Loading from '../../base/loading/loading';
+  import {mapMutations} from 'vuex';
 
   export default {
     data() {
@@ -71,7 +73,16 @@
           this.$refs.scroll.refresh();
           this.loaded = true;
         }
-      }
+      },
+      selectItem(item) {
+        this.$router.push({
+          path: `/rec/${item.dissid}`
+        });
+        this.setDisc(item);
+      },
+      ...mapMutations({
+        setDisc: 'SET_DISC'
+      })
     },
     components: {
       Slider,

@@ -21,6 +21,9 @@ const mutations = {
   },
   [types.SET_CURRENT_IDX](state, idx) {
     state.currentIdx = idx;
+  },
+  [types.SET_DISC](state, disc) {
+    state.disc = disc;
   }
 };
 
