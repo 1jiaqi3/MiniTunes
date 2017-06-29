@@ -15,7 +15,7 @@
         <div class="middle">
           <div class="middle-l">
             <div class="cd-wrapper" ref="cdWrapper">
-              <div class="cd">
+              <div class="cd" :class="cdRotate">
                 <img class="img" :src="currentSong.img"/>
               </div>
             </div>
@@ -30,7 +30,7 @@
               <i class="icon-prev"></i>
             </div>
             <div class="icon i-center">
-              <i class="icon-play"></i>
+              <i :class="playIcon" @click="togglePlay"></i>
             </div>
             <div class="icon i-right">
               <i class="icon-next"></i>
@@ -45,18 +45,21 @@
     <transition name="pullup">
       <div class="mini-player" v-show="!fullScreen" @click.stop.prevent="open">
         <div class="icon">
-          <img width="40" height="40" :src="currentSong.img"/>
+          <img width="40" height="40" :src="currentSong.img" :class="cdRotate"/>
         </div>
         <div class="text">
           <h2 class="name" v-html="currentSong.name"></h2>
           <p class="desc" v-html="currentSong.singers"></p>
         </div>
-        <div class="control"></div>
+        <div class="control">
+          <i class="icon-mini" :class="miniIcon" @click.stop="togglePlay"></i>
+        </div>
         <div class="control">
           <i class="icon-playlist"></i>
         </div>
       </div>
     </transition>
+    <audio :src="currentSong.url" ref="audio"></audio>
   </div>
 </template>
 
@@ -69,10 +72,20 @@
 
   export default {
     computed: {
+      playIcon() {
+        return this.playing ? 'icon-pause' : 'icon-play';
+      },
+      miniIcon() {
+        return this.playing ? 'icon-pause-mini' : 'icon-play-mini';
+      },
+      cdRotate() {
+        return this.playing ? 'play' : 'play pause';
+      },
       ...mapGetters([
         'fullScreen',
         'playlist',
-        'currentSong'
+        'currentSong',
+        'playing'
       ])
     },
     methods: {
@@ -131,9 +144,26 @@
         const y = window.innerHeight - finalPaddingTop - finalWidth / 2 - origPaddingBottom;
         return {x, y, scale};
       },
+      togglePlay() {
+        this.setPlayingState(!this.playing);
+      },
       ...mapMutations({
-        setFullScreen: 'SET_FULL_SCREEN'
+        setFullScreen: 'SET_FULL_SCREEN',
+        setPlayingState: 'SET_PLAYING_STATE'
       })
+    },
+    watch: {
+      currentSong() {
+        this.$nextTick(() => {
+          this.$refs.audio.play();
+        });
+      },
+      playing(newPlaying) {
+        const audio = this.$refs.audio;
+        this.$nextTick(() => {
+          newPlaying ? audio.play() : audio.pause();
+        });
+      }
     }
   };
 </script>
@@ -213,6 +243,10 @@
               box-sizing: border-box
               border: 10px solid rgba(255, 255, 255, 0.1)
               border-radius: 50%
+              &.play
+                animation: rotate 20s linear infinite
+              &.pause
+                animation-play-state: paused
               .img
                 position: absolute
                 left: 0
@@ -230,6 +264,30 @@
           transform: translate3d(0, -100px, 0)
         .bottom
           transform: translate3d(0, 100px, 0)
+      .bottom
+        position: absolute
+        bottom: 50px
+        width: 100%
+        .operators
+          display: flex
+          align-items: center
+          .icon
+            flex: 1
+            color: $color-theme
+            i
+              font-size: 30px
+          .i-left
+            text-align: right
+          .i-center
+            padding: 0 20px
+            text-align: center
+            i
+              font-size: 40px
+          .i-right
+            text-align: left
+          .icon-favorite
+            color: $color-sub-theme
+
     .mini-player
       display: flex
       align-items: center
@@ -246,6 +304,10 @@
         padding: 0 10px 0 20px
         img
           border-radius: 50%
+          &.play
+            animation: rotate 20s linear infinite
+          &.pause
+            animation-play-state: paused
       .text
         display: flex
         flex-direction: column
@@ -265,5 +327,12 @@
         flex: 0 0 30px
         width: 30px
         padding: 0 10px
-
+        .icon-play-mini, .icon-pause-mini, .icon-playlist
+          font-size: 30px
+          color: $color-theme
+  @keyframes rotate
+    0%
+      transform: rotate(0)
+    100%
+      transform: rotate(360deg)
 </style>
