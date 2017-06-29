@@ -1,63 +1,71 @@
 <template>
   <div class="player" v-show="playlist.length > 0">
-    <div class="normal-player" v-show="fullScreen">
-      <div class="background">
-        <img width="100%" height="100%" :src="currentSong.img">
-      </div>
-      <div class="top">
-        <div class="back" @click="back">
-          <i class="icon-back"></i>
+    <transition name="fall" @enter="enter" @after-enter="afterEnter" @leave="leave" @after-leave="afterLeave">
+      <div class="normal-player" v-show="fullScreen">
+        <div class="background">
+          <img width="100%" height="100%" :src="currentSong.img">
         </div>
-        <h1 class="title" v-html="currentSong.name"></h1>
-        <h2 class="subtitle" v-html="currentSong.singers"></h2>
-      </div>
-      <div class="middle">
-        <div class="middle-l">
-          <div class="cd-wrapper">
-            <div class="cd">
-              <img class="img" :src="currentSong.img"/>
+        <div class="top">
+          <div class="back" @click="back">
+            <i class="icon-back"></i>
+          </div>
+          <h1 class="title" v-html="currentSong.name"></h1>
+          <h2 class="subtitle" v-html="currentSong.singers"></h2>
+        </div>
+        <div class="middle">
+          <div class="middle-l">
+            <div class="cd-wrapper" ref="cdWrapper">
+              <div class="cd">
+                <img class="img" :src="currentSong.img"/>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bottom">
+          <div class="operators">
+            <div class="icon i-left">
+              <i class="icon-sequence"></i>
+            </div>
+            <div class="icon i-left">
+              <i class="icon-prev"></i>
+            </div>
+            <div class="icon i-center">
+              <i class="icon-play"></i>
+            </div>
+            <div class="icon i-right">
+              <i class="icon-next"></i>
+            </div>
+            <div class="icon i-right">
+              <i class="icon icon-not-favorite"></i>
             </div>
           </div>
         </div>
       </div>
-      <div class="bottom">
-        <div class="operators">
-          <div class="icon i-left">
-            <i class="icon-sequence"></i>
-          </div>
-          <div class="icon i-left">
-            <i class="icon-prev"></i>
-          </div>
-          <div class="icon i-center">
-            <i class="icon-play"></i>
-          </div>
-          <div class="icon i-right">
-            <i class="icon-next"></i>
-          </div>
-          <div class="icon i-right">
-            <i class="icon icon-not-favorite"></i>
-          </div>
+    </transition>
+    <transition name="pullup">
+      <div class="mini-player" v-show="!fullScreen" @click.stop.prevent="open">
+        <div class="icon">
+          <img width="40" height="40" :src="currentSong.img"/>
+        </div>
+        <div class="text">
+          <h2 class="name" v-html="currentSong.name"></h2>
+          <p class="desc" v-html="currentSong.singers"></p>
+        </div>
+        <div class="control"></div>
+        <div class="control">
+          <i class="icon-playlist"></i>
         </div>
       </div>
-    </div>
-    <div class="mini-player" v-show="!fullScreen" @click="open">
-      <div class="icon">
-        <img width="40" height="40" :src="currentSong.img"/>
-      </div>
-      <div class="text">
-        <h2 class="name" v-html="currentSong.name"></h2>
-        <p class="desc" v-html="currentSong.singers"></p>
-      </div>
-      <div class="control"></div>
-      <div class="control">
-        <i class="icon-playlist"></i>
-      </div>
-    </div>
+    </transition>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import {mapGetters, mapMutations} from 'vuex';
+  import animations from 'create-keyframe-animation';
+  import {prefixStyle} from '../../common/js/dom';
+
+  const transform = prefixStyle('transform');
 
   export default {
     computed: {
@@ -73,6 +81,55 @@
       },
       open() {
         this.setFullScreen(true);
+      },
+      enter(el, done) {
+        const {x, y, scale} = this._getOrigPosScale();
+
+        let animation = {
+          0: {
+            transform: `translate3d(${x}px, ${y}px, 0) scale(${scale})`
+          },
+          50: {
+            transform: `translate3d(0, 0, 0) scale(1.1)`
+          },
+          100: {
+            transform: `translate3d(0, 0, 0) scale(1)`
+          }
+        };
+        animations.registerAnimation({
+          name: 'move',
+          animation,
+          presets: {
+            duration: 400,
+            easing: 'linear'
+          }
+        });
+        animations.runAnimation(this.$refs.cdWrapper, 'move', done);
+      },
+      afterEnter() {
+        animations.unregisterAnimation('move');
+        this.$refs.cdWrapper.style.animation = '';
+      },
+      leave(el, done) {
+        this.$refs.cdWrapper.style.transition = 'all 0.4s';
+        const {x, y, scale} = this._getOrigPosScale();
+        this.$refs.cdWrapper.style[transform] = `translate3d(${x}px, ${y}px, 0) scale(${scale})`;
+        this.$refs.cdWrapper.addEventListener('transitionend', done);
+      },
+      afterLeave() {
+        this.$refs.cdWrapper.style.transition = '';
+        this.$refs.cdWrapper.style[transform] = '';
+      },
+      _getOrigPosScale() {
+        const origWidth = 40;
+        const origPaddingLeft = 40;
+        const origPaddingBottom = 30;
+        const finalPaddingTop = 80;
+        const finalWidth = window.innerWidth * 0.8;
+        const scale = origWidth / finalWidth;
+        const x = -(window.innerWidth / 2 - origPaddingLeft);
+        const y = window.innerHeight - finalPaddingTop - finalWidth / 2 - origPaddingBottom;
+        return {x, y, scale};
       },
       ...mapMutations({
         setFullScreen: 'SET_FULL_SCREEN'
@@ -163,8 +220,16 @@
                 width: 100%
                 height: 100%
                 border-radius: 50%
-
-
+      &.fall-enter-active, &.fall-leave-active
+        transition: all 0.4s
+        .top
+          transition: all 0.4s cubic-bezier(0.86, 0.18, 0.8, 1.3)
+      &.fall-enter, &.fall-leave-to
+        opacity: 0
+        .top
+          transform: translate3d(0, -100px, 0)
+        .bottom
+          transform: translate3d(0, 100px, 0)
     .mini-player
       display: flex
       align-items: center
@@ -173,7 +238,7 @@
       right: 0
       bottom: 0
       height: 60px
-      z-index: 100
+      z-index: 180
       background: $color-highlight-background
       .icon
         flex: 0 0 40px
