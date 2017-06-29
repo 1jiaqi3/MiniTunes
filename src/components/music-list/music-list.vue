@@ -17,7 +17,7 @@
     <scroll :data="songs" class="list" ref="list"
             :probe-type="probeType" :listen-scroll="listenScroll" @scroll="scroll">
       <div class="song-list-wrapper">
-        <song-list :songs="songs"></song-list>
+        <song-list :songs="songs" @select="selectSong"></song-list>
       </div>
       <div class="loading-container" v-show="!songs.length">
         <loading></loading>
@@ -31,6 +31,7 @@
   import SongList from '../../components/song-list/song-list';
   import {prefixStyle} from '../../common/js/dom';
   import Loading from '../../base/loading/loading';
+  import {mapActions} from 'vuex';
 
   const transform = prefixStyle('transform');
   const backdrop = prefixStyle('backdrop-filter');
@@ -76,7 +77,16 @@
       },
       back() {
         this.$router.back();
-      }
+      },
+      selectSong(song, idx) {
+        this.selectPlay({
+          list: this.songs,
+          idx
+        });
+      },
+      ...mapActions([
+        'selectPlay'
+      ])
     },
     watch: {
       scrollY(newY) {
