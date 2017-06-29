@@ -167,7 +167,7 @@
         height: 30px
         line-height: 30px
         padding-left: 20px
-        background: #827064
+        background: $color-highlight-background
       .list-group-item
         display: flex
         align-items: center
