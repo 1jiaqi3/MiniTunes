@@ -47,8 +47,10 @@
         this._changeProgress();
       },
       progressClick(e) {
-        this.$refs.progress.style.width = `${e.offsetX}px`;
-        this.$refs.btn.style[transform] = `translate3d(${e.offsetX}px, 0, 0)`;
+        const rect = this.$refs.progressBar.getBoundingClientRect();
+        const offset = e.pageX - rect.left;
+        this.$refs.progress.style.width = `${offset}px`;
+        this.$refs.btn.style[transform] = `translate3d(${offset}px, 0, 0)`;
         this._changeProgress();
       },
       _changeProgress() {

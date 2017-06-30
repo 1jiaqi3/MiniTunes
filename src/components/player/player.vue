@@ -66,7 +66,11 @@
         </div>
       </div>
     </transition>
-    <audio :src="currentSong.url" ref="audio" @canplay="ready" @error="error" @timeupdate="updateTime"></audio>
+    <audio :src="currentSong.url"
+           ref="audio" @canplay="ready"
+           @error="error"
+           @timeupdate="updateTime"
+           @ended="end"></audio>
   </div>
 </template>
 
@@ -76,6 +80,7 @@
   import {prefixStyle} from '../../common/js/dom';
   import ProgressBar from '../../base/progress-bar/progress-bar';
   import {playMode} from '../../common/js/config';
+  import {shuffle} from '../../common/js/util';
 
   const transform = prefixStyle('transform');
 
@@ -117,13 +122,39 @@
         'currentSong',
         'playing',
         'currentIdx',
-        'mode'
+        'mode',
+        'seqList'
       ])
     },
     methods: {
       changeMode() {
         const mode = (this.mode + 1) % 3;
         this.setMode(mode);
+        let list = null;
+        if (mode === playMode.random) {
+          list = shuffle(this.seqList);
+        } else {
+          list = this.seqList;
+        }
+        this.setPlayList(list);
+        this.resetCurrentIdx(list);
+      },
+      resetCurrentIdx(list) {
+        let idx = list.findIndex((item) => {
+          return item.id === this.currentSong.id;
+        });
+        this.setCurrentIdx(idx);
+      },
+      end() {
+        if (this.mode === playMode.loop) {
+          this.loop();
+        } else {
+          this.next();
+        }
+      },
+      loop() {
+        this.$refs.audio.currentTime = 0;
+        this.$refs.audio.play();
       },
       next() {
         if (!this.songReady) {
@@ -238,11 +269,15 @@
         setFullScreen: 'SET_FULL_SCREEN',
         setPlayingState: 'SET_PLAYING_STATE',
         setCurrentIdx: 'SET_CURRENT_IDX',
-        setMode: 'SET_PLAY_MODE'
+        setMode: 'SET_PLAY_MODE',
+        setPlayList: 'SET_PLAYLIST'
       })
     },
     watch: {
-      currentSong() {
+      currentSong(newSong, oldSong) {
+        if (newSong.id === oldSong.id) {
+          return;
+        }
         this.$nextTick(() => {
           this.$refs.audio.play();
         });

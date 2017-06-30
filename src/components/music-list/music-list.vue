@@ -6,7 +6,7 @@
     <h1 class="title" v-html="title"></h1>
     <div class="bg-img" :style="bgStyle" ref="bgimg">
       <div class="play-wrapper">
-        <div class="play" v-show="songs.length > 0" ref="play">
+        <div class="play" v-show="songs.length > 0" ref="play" @click="playRandom">
           <i class="icon-keyboard_arrow_right"></i>
           <span class="text">Pick One For Me</span>
         </div>
@@ -84,8 +84,14 @@
           idx
         });
       },
+      playRandom() {
+        this.randomPlay({
+          list: this.songs
+        });
+      },
       ...mapActions([
-        'selectPlay'
+        'selectPlay',
+        'randomPlay'
       ])
     },
     watch: {
