@@ -26,13 +26,13 @@
             <div class="icon i-left">
               <i class="icon-sequence"></i>
             </div>
-            <div class="icon i-left">
-              <i class="icon-prev"></i>
+            <div class="icon i-left" :class="disableBtn">
+              <i class="icon-prev" @click="prev"></i>
             </div>
-            <div class="icon i-center">
+            <div class="icon i-center" :class="disableBtn">
               <i :class="playIcon" @click="togglePlay"></i>
             </div>
-            <div class="icon i-right">
+            <div class="icon i-right" @click="next" :class="disableBtn">
               <i class="icon-next"></i>
             </div>
             <div class="icon i-right">
@@ -59,7 +59,7 @@
         </div>
       </div>
     </transition>
-    <audio :src="currentSong.url" ref="audio"></audio>
+    <audio :src="currentSong.url" ref="audio" @canplay="ready" @error="error"></audio>
   </div>
 </template>
 
@@ -71,6 +71,11 @@
   const transform = prefixStyle('transform');
 
   export default {
+    data() {
+      return {
+        songReady: false
+      };
+    },
     computed: {
       playIcon() {
         return this.playing ? 'icon-pause' : 'icon-play';
@@ -81,14 +86,52 @@
       cdRotate() {
         return this.playing ? 'play' : 'play pause';
       },
+      disableBtn() {
+        return this.songReady ? '' : 'disable';
+      },
       ...mapGetters([
         'fullScreen',
         'playlist',
         'currentSong',
-        'playing'
+        'playing',
+        'currentIdx'
       ])
     },
     methods: {
+      next() {
+        if (!this.songReady) {
+          return;
+        }
+        let idx = this.currentIdx + 1;
+        if (idx === this.playlist.length) {
+          idx = 0;
+        }
+        this.setCurrentIdx(idx);
+        if (!this.playing) {
+          this.togglePlay();
+        }
+        this.songReady = false;
+      },
+      prev() {
+        if (!this.songReady) {
+          return;
+        }
+        let idx = this.currentIdx - 1;
+        if (idx === -1) {
+          idx = this.playlist.length - 1;
+        }
+        this.setCurrentIdx(idx);
+        if (!this.playing) {
+          this.togglePlay();
+        }
+        this.songReady = false;
+      },
+      error() {
+        this.songReady = true;
+      },
+      ready() {
+        this.songReady = true;
+      },
       back() {
         this.setFullScreen(false);
       },
@@ -149,7 +192,8 @@
       },
       ...mapMutations({
         setFullScreen: 'SET_FULL_SCREEN',
-        setPlayingState: 'SET_PLAYING_STATE'
+        setPlayingState: 'SET_PLAYING_STATE',
+        setCurrentIdx: 'SET_CURRENT_IDX'
       })
     },
     watch: {
@@ -276,6 +320,8 @@
             color: $color-theme
             i
               font-size: 30px
+            &.disable
+              color: $color-theme-d
           .i-left
             text-align: right
           .i-center
