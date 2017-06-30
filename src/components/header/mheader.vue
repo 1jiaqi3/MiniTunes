@@ -1,6 +1,10 @@
 <template>
   <div class="header">
+    <div class="icon"></div>
     <h1 class="title">Tune</h1>
+    <router-link to="/user" class="user" tag="div">
+      <i class="icon-mine"></i>
+    </router-link>
   </div>
 </template>
 

@@ -7,6 +7,7 @@ import Singer from '../components/singer/singer';
 import SingerDetail from '../components/singer-detail/singer-detail';
 import Disc from '../components/disc/disc';
 import TopList from '../components/top-list/top-list';
+import User from '../components/user/user';
 
 Vue.use(Router);
 
@@ -45,6 +46,10 @@ export default new Router({
           component: SingerDetail
         }
       ]
+    },
+    {
+      path: '/user',
+      component: User
     }
   ]
 });
