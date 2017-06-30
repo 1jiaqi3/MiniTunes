@@ -24,7 +24,9 @@
         <div class="bottom">
           <div class="progress-wrapper">
             <span class="time time-left">{{formattingTime(currentTime)}}</span>
-            <div class="progress-bar-wrapper"></div>
+            <div class="progress-bar-wrapper">
+              <progress-bar :percent="percent"></progress-bar>
+            </div>
             <span class="time time-right">{{formattingTime(currentSong.duration)}}</span>
           </div>
           <div class="operators">
@@ -72,6 +74,7 @@
   import {mapGetters, mapMutations} from 'vuex';
   import animations from 'create-keyframe-animation';
   import {prefixStyle} from '../../common/js/dom';
+  import ProgressBar from '../../base/progress-bar/progress-bar';
 
   const transform = prefixStyle('transform');
 
@@ -94,6 +97,9 @@
       },
       disableBtn() {
         return this.songReady ? '' : 'disable';
+      },
+      percent() {
+        return this.currentTime / this.currentSong.duration;
       },
       ...mapGetters([
         'fullScreen',
@@ -228,6 +234,9 @@
           newPlaying ? audio.play() : audio.pause();
         });
       }
+    },
+    components: {
+      ProgressBar
     }
   };
 </script>
@@ -332,6 +341,22 @@
         position: absolute
         bottom: 50px
         width: 100%
+        .progress-wrapper
+          display: flex
+          align-items: center
+          width: 80%
+          margin: 0 auto
+          padding: 10px 0
+          .time
+            color: $color-text
+            font-size: $font-size-small
+            flex: 0 0 30px
+          .time-left
+            text-align: left
+          .time-right
+            text-align: right
+        .progress-bar-wrapper
+          flex: 1
         .operators
           display: flex
           align-items: center
