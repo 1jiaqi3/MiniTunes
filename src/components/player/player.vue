@@ -30,8 +30,8 @@
             <span class="time time-right">{{formattingTime(currentSong.duration)}}</span>
           </div>
           <div class="operators">
-            <div class="icon i-left">
-              <i class="icon-sequence"></i>
+            <div class="icon i-left" @click="changeMode">
+              <i :class="iconMode"></i>
             </div>
             <div class="icon i-left" :class="disableBtn">
               <i class="icon-prev" @click="prev"></i>
@@ -75,6 +75,7 @@
   import animations from 'create-keyframe-animation';
   import {prefixStyle} from '../../common/js/dom';
   import ProgressBar from '../../base/progress-bar/progress-bar';
+  import {playMode} from '../../common/js/config';
 
   const transform = prefixStyle('transform');
 
@@ -86,6 +87,15 @@
       };
     },
     computed: {
+      iconMode() {
+        let res = 'icon-sequence';
+        if (this.mode === playMode.loop) {
+          res = 'icon-loop';
+        } else if (this.mode === playMode.random) {
+          res = 'icon-random';
+        }
+        return res;
+      },
       playIcon() {
         return this.playing ? 'icon-pause' : 'icon-play';
       },
@@ -106,10 +116,15 @@
         'playlist',
         'currentSong',
         'playing',
-        'currentIdx'
+        'currentIdx',
+        'mode'
       ])
     },
     methods: {
+      changeMode() {
+        const mode = (this.mode + 1) % 3;
+        this.setMode(mode);
+      },
       next() {
         if (!this.songReady) {
           return;
@@ -222,7 +237,8 @@
       ...mapMutations({
         setFullScreen: 'SET_FULL_SCREEN',
         setPlayingState: 'SET_PLAYING_STATE',
-        setCurrentIdx: 'SET_CURRENT_IDX'
+        setCurrentIdx: 'SET_CURRENT_IDX',
+        setMode: 'SET_PLAY_MODE'
       })
     },
     watch: {
