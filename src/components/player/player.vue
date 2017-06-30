@@ -22,6 +22,11 @@
           </div>
         </div>
         <div class="bottom">
+          <div class="progress-wrapper">
+            <span class="time time-left">{{formattingTime(currentTime)}}</span>
+            <div class="progress-bar-wrapper"></div>
+            <span class="time time-right">{{formattingTime(currentSong.duration)}}</span>
+          </div>
           <div class="operators">
             <div class="icon i-left">
               <i class="icon-sequence"></i>
@@ -59,7 +64,7 @@
         </div>
       </div>
     </transition>
-    <audio :src="currentSong.url" ref="audio" @canplay="ready" @error="error"></audio>
+    <audio :src="currentSong.url" ref="audio" @canplay="ready" @error="error" @timeupdate="updateTime"></audio>
   </div>
 </template>
 
@@ -73,7 +78,8 @@
   export default {
     data() {
       return {
-        songReady: false
+        songReady: false,
+        currentTime: 0
       };
     },
     computed: {
@@ -131,6 +137,20 @@
       },
       ready() {
         this.songReady = true;
+      },
+      updateTime(e) {
+        this.currentTime = e.target.currentTime;
+      },
+      formattingTime(interval) {
+        interval = interval | 0;
+        const minute = Math.floor(interval / 60);
+        let second = interval % 60;
+        let len = second.toString().length;
+        while (len < 2) {
+          second = '0' + second;
+          len++;
+        }
+        return `${minute}:${second}`;
       },
       back() {
         this.setFullScreen(false);
