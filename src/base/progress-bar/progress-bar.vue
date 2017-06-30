@@ -1,8 +1,12 @@
 <template>
-  <div class="progress-bar" ref="progressBar">
+  <div class="progress-bar" ref="progressBar" @click="progressClick">
     <div class="bar-inner">
       <div class="progress" ref="progress"></div>
-      <div class="progress-btn-wrapper" ref="btn">
+      <div class="progress-btn-wrapper"
+           ref="btn"
+           @touchstart.prevent="progressTouchStart"
+           @touchmove.prevent="progressTouchMove"
+           @touchend.prevent="progressTouchEnd">
         <div class="progress-btn"></div>
       </div>
     </div>
@@ -20,9 +24,42 @@
         default: 0
       }
     },
+    created() {
+      this.touch = {};
+    },
+    methods: {
+      progressTouchStart(e) {
+        this.touch.initiated = true;
+        this.touch.startX = e.touches[0].pageX;
+        this.touch.left = this.$refs.progress.clientWidth;
+      },
+      progressTouchMove(e) {
+        if (!this.touch.initiated) {
+          return;
+        }
+        const dx = e.touches[0].pageX - this.touch.startX;
+        const offset = Math.min(Math.max(0, this.touch.left + dx), this.$refs.progressBar.clientWidth - BALL_RADIUS);
+        this.$refs.progress.style.width = `${offset}px`;
+        this.$refs.btn.style[transform] = `translate3d(${offset}px, 0, 0)`;
+      },
+      progressTouchEnd() {
+        this.touch.initiated = false;
+        this._changeProgress();
+      },
+      progressClick(e) {
+        this.$refs.progress.style.width = `${e.offsetX}px`;
+        this.$refs.btn.style[transform] = `translate3d(${e.offsetX}px, 0, 0)`;
+        this._changeProgress();
+      },
+      _changeProgress() {
+        const barWidth = this.$refs.progressBar.clientWidth - BALL_RADIUS;
+        const percent = this.$refs.progress.clientWidth / barWidth;
+        this.$emit('percentChange', percent);
+      }
+    },
     watch: {
       percent(newPercent) {
-        if (newPercent >= 0) {
+        if (newPercent >= 0 && !this.touch.initiated) {
           const barWidth = this.$refs.progressBar.clientWidth - BALL_RADIUS;
           const offset = newPercent * barWidth;
           this.$refs.progress.style.width = `${offset}px`;
