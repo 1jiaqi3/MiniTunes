@@ -1,9 +1,9 @@
 <template>
   <div class="search">
     <div class="search-box-wrapper">
-      <search-box ref="searchBox"></search-box>
+      <search-box ref="searchBox" @query="onQueryChange"></search-box>
     </div>
-    <div class="shortcut-box-wrapper">
+    <div class="shortcut-box-wrapper" v-show="!query">
       <div class="shortcut">
         <div class="hot-search">
           <h1 class="title">Hot Searches</h1>
@@ -15,6 +15,9 @@
         </div>
       </div>
     </div>
+    <div class="search-res" v-show="query">
+      <suggestion :query="query"></suggestion>
+    </div>
   </div>
 </template>
 
@@ -22,29 +25,35 @@
   import SearchBox from '../../base/search-box/search-box';
   import {getHotSearch} from '../../common/api/search';
   import {ERR_OK} from '../../common/api/config';
+  import Suggestion from '../../components/suggestion/suggestion';
   export default {
     created() {
       this._getHotSearch();
     },
     data() {
       return {
-        hotSearch: []
+        hotSearch: [],
+        query: ''
       };
     },
     methods: {
       _getHotSearch() {
         getHotSearch().then((res) => {
           if (res.code === ERR_OK) {
-            this.hotSearch = res.data.hotkey.slice(0, 20);
+            this.hotSearch = res.data.hotkey;
           }
         });
       },
       addQuery(query) {
         this.$refs.searchBox.setQuery(query);
+      },
+      onQueryChange(query) {
+        this.query = query;
       }
     },
     components: {
-      SearchBox
+      SearchBox,
+      Suggestion
     }
   };
 </script>

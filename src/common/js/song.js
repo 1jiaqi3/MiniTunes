@@ -24,7 +24,7 @@ export function createSong(musicData) {
   });
 }
 
-function filterSingers(singers) {
+export function filterSingers(singers) {
   let res = [];
   if (!singers) {
     return '';
